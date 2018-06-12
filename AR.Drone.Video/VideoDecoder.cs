@@ -13,22 +13,22 @@ namespace AR.Drone.Video
 
         static VideoDecoder()
         {
-            FFmpegInvoke.avcodec_register_all();
+            ffmpeg.avcodec_register_all();
         }
 
         public VideoDecoder()
         {
-            _pFrame = FFmpegInvoke.av_frame_alloc();
+            _pFrame = ffmpeg.av_frame_alloc();
 
-            AVCodec* pCodec = FFmpegInvoke.avcodec_find_decoder(CodecId);
+            AVCodec* pCodec = ffmpeg.avcodec_find_decoder(CodecId);
 
             if (pCodec == null)
                 throw new VideoDecoderException("Unsupported codec.");
 
-            _pDecodingContext = FFmpegInvoke.avcodec_alloc_context3(pCodec);
+            _pDecodingContext = ffmpeg.avcodec_alloc_context3(pCodec);
 
 
-            if (FFmpegInvoke.avcodec_open2(_pDecodingContext, pCodec, null) < 0)
+            if (ffmpeg.avcodec_open2(_pDecodingContext, pCodec, null) < 0)
                 throw new VideoDecoderException("Could not open codec.");
         }
 
@@ -37,7 +37,7 @@ namespace AR.Drone.Video
             int gotPicture;
             fixed (AVPacket* pPacket = &packet)
             {
-                int decodedSize = FFmpegInvoke.avcodec_decode_video2(_pDecodingContext, _pFrame, &gotPicture, pPacket);
+                int decodedSize = ffmpeg.avcodec_decode_video2(_pDecodingContext, _pFrame, &gotPicture, pPacket);
                 if (decodedSize < 0)
                     Trace.TraceWarning("Error while decoding frame.");
             }
@@ -48,11 +48,11 @@ namespace AR.Drone.Video
 
         protected override void DisposeOverride()
         {
-            FFmpegInvoke.avcodec_close(_pDecodingContext);
+            ffmpeg.avcodec_close(_pDecodingContext);
 
             AVFrame* frameOnStack = _pFrame;
             AVFrame** frame = &frameOnStack;
-            FFmpegInvoke.av_frame_free(frame);
+            ffmpeg.av_frame_free(frame);
         }
     }
 }
